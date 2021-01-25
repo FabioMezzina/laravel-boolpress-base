@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Article;
 
 class ArticleController extends Controller
 {
@@ -13,7 +14,13 @@ class ArticleController extends Controller
      */
     public function index()
     {
-        //
+        // get all articles from db
+        $articles = Article::all();
+        // create body preview
+        foreach ($articles as $article) {
+            $article['body'] = substr($article['body'], 0, 25) . '...';
+        }
+        return view('articles.index', compact('articles'));
     }
 
     /**

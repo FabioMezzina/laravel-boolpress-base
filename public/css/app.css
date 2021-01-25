@@ -10944,3 +10944,7 @@ a.text-dark:focus {
   }
 }
 
+.table tr td {
+  vertical-align: middle;
+}
+
