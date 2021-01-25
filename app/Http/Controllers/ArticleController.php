@@ -143,7 +143,22 @@ class ArticleController extends Controller
      */
     public function destroy($id)
     {
-        //
+        // get record from db
+        $article = Article::find($id);
+
+        // delete image if an image is linked to the record
+        if(!empty($article->path_img)) {
+            Storage::disk('public')->delete($article->path_img);
+        }
+
+        // save a session reference
+        $ref = $article->title;
+
+        // delete record from db
+        $deleted = $article->delete();
+        if($deleted) {
+            return redirect()->route('articles.index')->with('ref', $ref);
+        }
     }
 
     /**

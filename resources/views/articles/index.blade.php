@@ -2,6 +2,9 @@
 
 @section('content')
 <div class="container">
+  @if (session('ref'))
+  <div class="alert alert-warning">L'articolo: {{ session('ref') }} è stato eliminato!</div>
+  @endif
   <table class="table table-dark">
     <thead>
       <tr>
@@ -25,7 +28,13 @@
         <td>{{ $article->updated_at->diffForHumans() }}</td>
         <td><a href="{{ route('articles.show', $article->slug) }}" class="btn btn-primary">View</a></td>
         <td><a href="{{ route('articles.edit', $article->slug) }}" class="btn btn-success">Edit</a></td>
-        <td><a href="" class="btn btn-danger">Delete</a></td>
+        <td>
+          <form action="{{ route('articles.destroy', $article->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <input type="submit" class="btn btn-danger" value="Delete">
+          </form>
+        </td>
       </tr>
       @empty
       <tr>
