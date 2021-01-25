@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use App\Article;
 
 class ArticleController extends Controller
@@ -44,7 +45,7 @@ class ArticleController extends Controller
     public function store(Request $request)
     {
         //form input validation
-        $request->validate($this->validationParam());
+        $request->validate($this->validationParam(false));
 
         // get data and create a slug
         $data = $request->all();
@@ -89,9 +90,10 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($slug)
     {
-        //
+        $article = Article::where('slug', $slug)->first();
+        return view('articles.edit', compact('article'));
     }
 
     /**
@@ -103,7 +105,34 @@ class ArticleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // validation
+        $request->validate($this->validationParam(true, $id));
+        $data = $request->all();
+        
+        //get the article's record
+        $article = Article::find($id);
+        
+        // create new slug
+        $data['slug'] = Str::slug($data['title'], '-');
+
+        // check if we have an image in input
+        if(!empty($data['path_img'])) {
+            // check if we already have an image stored in db
+            if(!empty($article->path_img)) {
+                // delete previous image
+                Storage::disk('public')->delete($article->path_img);
+            }
+            // save new image and store new img path in data
+            $data['path_img'] = Storage::disk('public')->put('images', $data['path_img']);
+        }
+
+        // update db record
+        $updated = $article->update($data);
+
+        // check if update goes well
+        if($updated) {
+            return redirect()->route('articles.show', $article->slug);
+        }
     }
 
     /**
@@ -118,11 +147,22 @@ class ArticleController extends Controller
     }
 
     /**
-     * Validation function
+     * Validation function with title exception for updating a record
      */
-    private function validationParam() {
+    private function validationParam($update, $recordId = null) {
+        if($update) {
+            // set Rule exception for title if we are updating the record
+            $title_rules = [
+                'required',
+                Rule::unique('articles')->ignore($recordId)
+            ];
+        } else {
+            // title must be unique if we are not updating (so we are creating a new one)
+            $title_rules = 'required | unique:articles';
+        }
+        // return the array 
         return [
-            'title' => 'required | unique:articles',
+            'title' => $title_rules,
             'body' => 'required',
             'author' => 'required | max:50',
             'path_img' => 'image'
