@@ -23,7 +23,7 @@
         <td>{{ $article->author }}</td>
         <td>{{ $article->body }}</td>
         <td>{{ $article->updated_at->diffForHumans() }}</td>
-        <td><a href="" class="btn btn-primary">View</a></td>
+        <td><a href="{{ route('articles.show', $article->slug) }}" class="btn btn-primary">View</a></td>
         <td><a href="" class="btn btn-success">Edit</a></td>
         <td><a href="" class="btn btn-danger">Delete</a></td>
       </tr>
