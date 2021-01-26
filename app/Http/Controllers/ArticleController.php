@@ -18,7 +18,7 @@ class ArticleController extends Controller
     public function index()
     {
         // get all articles from db
-        $articles = Article::all();
+        $articles = Article::orderBy('id', 'asc')->paginate(8);
         // create body preview
         foreach ($articles as $article) {
             $article['body'] = substr($article['body'], 0, 25) . '...';

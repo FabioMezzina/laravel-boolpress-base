@@ -43,6 +43,7 @@
       @endforelse
     </tbody>
   </table>
+  {{ $articles->links() }}
 
 </div>
 @endsection
