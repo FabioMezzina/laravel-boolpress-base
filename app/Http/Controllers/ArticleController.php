@@ -75,24 +75,36 @@ class ArticleController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  string  $slug
      * @return \Illuminate\Http\Response
      */
     public function show($slug)
     {
         $article = Article::where('slug', $slug)->first();
+
+        // 404 if article is null
+        if(empty($article)) {
+            return abort(404);
+        }
+
         return view('articles.show', compact('article'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  string  $slug
      * @return \Illuminate\Http\Response
      */
     public function edit($slug)
     {
         $article = Article::where('slug', $slug)->first();
+
+        // 404 if article is null
+        if(empty($article)) {
+            return abort(404);
+        }
+
         return view('articles.edit', compact('article'));
     }
 
@@ -146,17 +158,17 @@ class ArticleController extends Controller
         // get record from db
         $article = Article::find($id);
 
-        // delete image if an image is linked to the record
-        if(!empty($article->path_img)) {
-            Storage::disk('public')->delete($article->path_img);
-        }
-
+        // get path image if an image is linked to the record
+        $image = !empty($article->path_img) ? $article->path_img : false;
         // save a session reference
         $ref = $article->title;
 
-        // delete record from db
+        // delete record from db and related image locally
         $deleted = $article->delete();
         if($deleted) {
+            if($image) {
+                Storage::disk('public')->delete($image);
+            }
             return redirect()->route('articles.index')->with('ref', $ref);
         }
     }
