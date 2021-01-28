@@ -39,6 +39,16 @@
       @endif
       <input type="file" class="form-control" accept="image/*" name="path_img">
     </div>
+      {{-- Tag section --}}
+      <div class="form-group">
+        <label>Select one or more tags for your article</label>
+        @foreach ($tags as $tag)
+        <div class="form-check">
+          <input type="checkbox" name="tags[]" value="{{ $tag->id }}" id="tag-{{ $tag->id }}" {{ $article->tags->contains($tag->id) ? 'checked' : '' }} />
+          <label for="tag-{{ $tag->id }}">{{ $tag->name }}</label>
+        </div>
+        @endforeach
+      </div>
     {{-- Submit article --}}
     <input type="submit" value="Edit article" class="btn btn-primary">
   </form>

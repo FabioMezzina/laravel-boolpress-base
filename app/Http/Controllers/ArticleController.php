@@ -110,13 +110,13 @@ class ArticleController extends Controller
     public function edit($slug)
     {
         $article = Article::where('slug', $slug)->first();
-
+        $tags = Tag::all();
         // 404 if article is null
         if(empty($article)) {
             return abort(404);
         }
 
-        return view('articles.edit', compact('article'));
+        return view('articles.edit', compact('article', 'tags'));
     }
 
     /**
@@ -147,6 +147,17 @@ class ArticleController extends Controller
             }
             // save new image and store new img path in data
             $data['path_img'] = Storage::disk('public')->put('images', $data['path_img']);
+        }
+
+        /**
+         * check for selected tags
+         * if some tags were provided, update pivot
+         * if no tags were provided, delete every relations for that article
+         */
+        if(!empty($data['tags'])) {
+            $article->tags()->sync($data['tags']);
+        } else {
+            $article->tags()->detach();
         }
 
         // update db record
