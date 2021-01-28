@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use App\Article;
+use App\Tag;
 
 class ArticleController extends Controller
 {
@@ -33,7 +34,9 @@ class ArticleController extends Controller
      */
     public function create()
     {
-        return view('articles.create');
+        // get all tags to populate checkbox area in create view
+        $tags = Tag::all();
+        return view('articles.create', compact('tags'));
     }
 
     /**
@@ -49,6 +52,7 @@ class ArticleController extends Controller
 
         // get data and create a slug
         $data = $request->all();
+        // dd($data['tags']);
         $data['slug'] = Str::slug($data['title'], '-');
 
         /**
@@ -62,10 +66,16 @@ class ArticleController extends Controller
         // create a new article instance with $data from input form
         $newArticle = new Article();
         $newArticle->fill($data);
-
+        
         // check if saving to db goes well
         $saved = $newArticle->save();
         if($saved) {
+            // check if the article has tags
+            if(!empty($data['tags'])) {
+                // add article_id to $data, then populate pivot table
+                $data['article_id'] = $newArticle->id;
+                $newArticle->tags()->attach($data['tags']);
+            }
             return redirect()->route('articles.index');
         } else {
             return redirect()->route('home');
