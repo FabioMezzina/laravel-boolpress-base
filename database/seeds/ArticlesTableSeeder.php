@@ -14,7 +14,7 @@ class ArticlesTableSeeder extends Seeder
      */
     public function run(Faker $faker)
     {
-        for($i = 0; $i < 20; $i++) {
+        for($i = 0; $i < 10; $i++) {
             $article = new Article();
             $article->title = $faker->sentence(5);
             $article->body = $faker->paragraphs(3, true);

@@ -13,4 +13,9 @@ class Article extends Model
         'slug',
         'path_img'
     ];
+
+    // relation with tags
+    public function tags() {
+        return $this->belongsToMany('App\Tag');
+    }
 }
