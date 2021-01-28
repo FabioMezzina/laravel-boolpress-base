@@ -149,22 +149,22 @@ class ArticleController extends Controller
             $data['path_img'] = Storage::disk('public')->put('images', $data['path_img']);
         }
 
-        /**
-         * check for selected tags
-         * if some tags were provided, update pivot
-         * if no tags were provided, delete every relations for that article
-         */
-        if(!empty($data['tags'])) {
-            $article->tags()->sync($data['tags']);
-        } else {
-            $article->tags()->detach();
-        }
-
+        
         // update db record
         $updated = $article->update($data);
-
+        
         // check if update goes well
         if($updated) {
+            /**
+             * check for selected tags
+             * if some tags were provided, update pivot
+             * if no tags were provided, delete every relations for that article
+             */
+            if(!empty($data['tags'])) {
+                $article->tags()->sync($data['tags']);
+            } else {
+                $article->tags()->detach();
+            }
             return redirect()->route('articles.show', $article->slug);
         }
     }
@@ -185,7 +185,8 @@ class ArticleController extends Controller
         // save a session reference
         $ref = $article->title;
 
-        // delete record from db and related image locally
+        // delete record from db, related image locally, and pivot relations
+        $article->tags()->detach();
         $deleted = $article->delete();
         if($deleted) {
             if($image) {
