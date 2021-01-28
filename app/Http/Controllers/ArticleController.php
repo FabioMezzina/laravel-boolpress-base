@@ -91,13 +91,14 @@ class ArticleController extends Controller
     public function show($slug)
     {
         $article = Article::where('slug', $slug)->first();
+        $tags = Tag::all();
 
         // 404 if article is null
         if(empty($article)) {
             return abort(404);
         }
 
-        return view('articles.show', compact('article'));
+        return view('articles.show', compact('article', 'tags'));
     }
 
     /**
